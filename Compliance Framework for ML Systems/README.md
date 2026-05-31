@@ -23,22 +23,23 @@ warehouse, feature store, model registry, or audit backend.
 ## Project Layout
 
 ```text
-.
-+-- audit/
-|   +-- log.py                       # tamper-evident audit log
-+-- data_inventory/
-|   +-- scan.py                      # dataframe PII/PHI classifier
-|   +-- kyverno-data-class.yaml      # PV/PVC data_class enforcement
-+-- fairness/
-|   +-- promotion_gate.py            # Production fairness review gate
-+-- gdpr/
-|   +-- api.py                       # GDPR subject rights API
-+-- lineage/
-|   +-- graph.py                     # column-level lineage graph
-+-- quarterly_report/
-|   +-- generate.py                  # quarterly compliance report generator
-+-- REQUIREMENTS.md
-+-- README.md
+Compliance Framework for ML Systems/
+|-- README.md
+|-- REQUIREMENTS.md
+|-- SOLUTION.md
+|-- audit/
+|   `-- log.py                       # tamper-evident audit log
+|-- data_inventory/
+|   |-- scan.py                      # dataframe PII/PHI classifier
+|   `-- kyverno-data-class.yaml      # PV/PVC data_class enforcement
+|-- fairness/
+|   `-- promotion_gate.py            # Production fairness review gate
+|-- gdpr/
+|   `-- api.py                       # GDPR subject rights API
+|-- lineage/
+|   `-- graph.py                     # column-level lineage graph
+`-- quarterly_report/
+    `-- generate.py                  # quarterly compliance report generator
 ```
 
 ## Requirements
