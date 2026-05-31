@@ -1,6 +1,4 @@
-# Project 4 Solution — Secure ML CI/CD
-
-Reference for [learning project 4](https://github.com/ai-infra-curriculum/ai-infra-security-learning/tree/main/projects/project-4-secure-cicd).
+# Project 4 Secure ML CI/CD
 
 ## Cross-references (where the working artifacts live)
 
