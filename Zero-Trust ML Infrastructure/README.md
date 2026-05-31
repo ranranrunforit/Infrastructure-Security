@@ -1,6 +1,6 @@
 # Project 1 Solution - Zero-Trust ML Infrastructure
 
-Reference implementation for the zero-trust ML infrastructure project.
+Implementation for the zero-trust ML infrastructure project.
 
 ## Components
 
