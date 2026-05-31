@@ -1,0 +1,36 @@
+title: Lateral movement from training workload to unrelated service
+id: 7c8d9e0f-1a2b-3c4d-5e6f-7g8h9i0j1k2l
+status: stable
+description: |
+  Detects a training/inference pod (identified by SPIFFE ID) initiating
+  connections to services outside its declared dependency set (e.g. a
+  training pod reaching the model registry or feature store it has no
+  business touching).
+references:
+  - https://attack.mitre.org/techniques/T1021/
+  - https://atlas.mitre.org/techniques/AML.T0044
+author: ml-soc
+date: 2026-05-23
+logsource:
+  product: kubernetes
+  service: service-mesh
+detection:
+  selection:
+    source.spiffe_id|contains:
+      - 'spiffe://cluster/ns/training/'
+      - 'spiffe://cluster/ns/inference/'
+    destination.service|contains:
+      - 'model-registry'
+      - 'feature-store'
+      - 'vault'
+      - 'secrets-manager'
+  allowed:
+    source.dependency_allowlist|contains: destination.service
+  condition: selection and not allowed
+falsepositives:
+  - new dependency added without updating the allowlist (verify with team)
+level: high
+tags:
+  - attack.t1021
+  - attack.lateral_movement
+  - atlas.t0044    # ml.lateral-movement-via-credential

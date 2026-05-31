@@ -1,0 +1,42 @@
+# 24/7 monitoring and alert routing for the ML SOC.
+
+on_call:
+  schedule: ml-soc-primary
+  coverage: 24x7
+  rotation:
+    handoff_time_utc: "09:00"
+    primary: weekly
+    secondary: weekly
+  escalation:
+    - after: 10m
+      target: ml-soc-secondary
+    - after: 20m
+      target: security-manager
+
+routes:
+  - name: critical-security-incidents
+    match:
+      severity: critical
+    notify:
+      - pagerduty: ml-soc-primary
+      - slack: "#sec-incident"
+    repeat_interval: 30m
+
+  - name: high-security-incidents
+    match:
+      severity: high
+    notify:
+      - pagerduty: ml-soc-primary
+      - slack: "#sec-incident"
+    repeat_interval: 1h
+
+  - name: threat-intel-enrichment
+    match:
+      source: threat-intel
+    notify:
+      - slack: "#sec-intel"
+    repeat_interval: 4h
+
+silences:
+  require_incident_or_change_ticket: true
+  max_duration: 4h

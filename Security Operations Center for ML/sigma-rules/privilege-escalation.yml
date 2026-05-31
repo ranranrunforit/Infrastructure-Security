@@ -1,0 +1,52 @@
+title: Privilege escalation in ML workload namespace
+id: 2b3c4d5e-6f7g-8h9i-0j1k-2l3m4n5o6p7q
+status: stable
+description: |
+  Detects RBAC privilege escalation attempts inside ML namespaces — service
+  accounts requesting cluster-admin / impersonation rights, or pod-level
+  exec/attach into privileged containers from non-admin identities.
+references:
+  - https://attack.mitre.org/techniques/T1068/
+  - https://attack.mitre.org/techniques/T1078/004/
+  - https://atlas.mitre.org/techniques/AML.T0049
+author: ml-soc
+date: 2026-05-23
+logsource:
+  product: kubernetes
+  service: audit
+detection:
+  rbac_escalation:
+    verb:
+      - 'create'
+      - 'update'
+      - 'patch'
+    objectRef.resource:
+      - 'clusterrolebindings'
+      - 'rolebindings'
+    requestObject.roleRef.name|contains:
+      - 'cluster-admin'
+      - 'admin'
+      - 'edit'
+    objectRef.namespace|contains:
+      - 'training'
+      - 'inference'
+      - 'model-registry'
+  privileged_exec:
+    verb:
+      - 'create'
+    objectRef.subresource:
+      - 'exec'
+      - 'attach'
+    user.groups|not_contains: 'system:masters'
+    objectRef.namespace|contains:
+      - 'training'
+      - 'inference'
+  condition: rbac_escalation or privileged_exec
+falsepositives:
+  - break-glass admin action during incident (verify against change-mgmt ticket)
+level: high
+tags:
+  - attack.t1068
+  - attack.t1078.004
+  - attack.privilege_escalation
+  - atlas.t0049    # ml.exploit-public-facing-application

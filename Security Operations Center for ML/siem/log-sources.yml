@@ -1,0 +1,100 @@
+# SIEM log-source aggregation config.
+#
+# Each source declares: collector, parser, normalization target (ECS), and the
+# index / stream the SIEM ingests into. Sigma rules in ../sigma-rules/ are
+# written against these normalized fields.
+
+sources:
+
+  - name: k8s-audit
+    description: Kubernetes API server audit log (RBAC, exec, secrets access)
+    collector: fluent-bit
+    input:
+      type: tail
+      path: /var/log/kubernetes/audit/*.log
+      parser: json
+    normalize_to: ecs
+    field_map:
+      user.username: user.name
+      objectRef.namespace: kubernetes.namespace
+      objectRef.resource: kubernetes.resource
+      verb: event.action
+    index: siem-k8s-audit
+    retention_days: 365
+
+  - name: falco
+    description: Runtime syscall / container behavior alerts
+    collector: falco-sidekick
+    input:
+      type: http
+      endpoint: /falco/events
+      parser: json
+    normalize_to: ecs
+    field_map:
+      output_fields.container.id: container.id
+      output_fields.k8s.pod.name: kubernetes.pod.name
+      priority: event.severity
+    index: siem-falco
+    retention_days: 180
+
+  - name: vault-audit
+    description: HashiCorp Vault audit log (secret access, token issuance)
+    collector: fluent-bit
+    input:
+      type: socket
+      path: /var/run/vault/audit.sock
+      parser: json
+    normalize_to: ecs
+    field_map:
+      auth.display_name: user.name
+      request.path: url.path
+      request.client_token_accessor: user.id
+    index: siem-vault
+    retention_days: 365
+
+  - name: model-registry
+    description: Model registry access log (artifact downloads, version bumps)
+    collector: vector
+    input:
+      type: http
+      endpoint: /mlflow/audit
+      parser: json
+    normalize_to: ecs
+    field_map:
+      actor: user.name
+      artifact_uri: file.path
+      operation: event.action
+    index: siem-model-registry
+    retention_days: 365
+
+  - name: service-mesh
+    description: Istio / Cilium mesh access logs (mTLS-identified flows)
+    collector: fluent-bit
+    input:
+      type: tail
+      path: /var/log/envoy/access.log
+      parser: json
+    normalize_to: ecs
+    field_map:
+      source.principal: source.spiffe_id
+      destination.service: destination.service
+      response.code: http.response.status_code
+      bytes_sent: network.bytes_out
+    index: siem-service-mesh
+    retention_days: 180
+
+# Where parsed events land. The Sigma backend converts ../sigma-rules/*.yml
+# against the index names above.
+pipelines:
+  default:
+    output:
+      type: elasticsearch
+      hosts: ["https://siem-es.internal:9200"]
+      auth:
+        method: mtls
+        cert: /etc/siem/client.crt
+        key: /etc/siem/client.key
+    buffer:
+      type: disk
+      path: /var/lib/siem/buffer
+      max_size_mb: 4096

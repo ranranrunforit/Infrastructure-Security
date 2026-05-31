@@ -1,0 +1,96 @@
+# SOAR — automated response playbooks bound to Sigma rule IDs.
+#
+# Each automation maps a triggering detection to an idempotent action set
+# executed by the SOAR runner. Actions that change shared infra (rotation,
+# pod isolation) require dual-approval below a confidence threshold.
+
+automations:
+
+  - id: block-ip-exfil
+    trigger_rule: 1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p   # data-exfiltration.yml
+    description: Block source IP of confirmed bulk-egress events at the edge WAF
+    actions:
+      - type: waf_block_ip
+        target: cloudflare
+        params:
+          ip: "{{ event.source.ip }}"
+          ttl: 24h
+          reason: "soar:data-exfiltration:{{ event.id }}"
+      - type: notify
+        channel: "#sec-incident"
+        message: "Blocked {{ event.source.ip }} for data-exfiltration ({{ event.id }})"
+    approval:
+      required_if_confidence_below: 0.9
+      approvers: ["sec-oncall"]
+    cooldown: 5m
+
+  - id: rotate-secret-on-lateral
+    trigger_rule: 7c8d9e0f-1a2b-3c4d-5e6f-7g8h9i0j1k2l   # lateral-movement.yml
+    description: Rotate the SPIFFE-bound credential used by the compromised workload
+    actions:
+      - type: vault_rotate_secret
+        params:
+          path: "secret/data/workload/{{ event.source.spiffe_id | last_segment }}"
+      - type: k8s_restart_workload
+        params:
+          namespace: "{{ event.source.namespace }}"
+          selector: "spiffe-id={{ event.source.spiffe_id }}"
+      - type: notify
+        channel: "#sec-incident"
+        message: "Rotated secret + restarted workload for {{ event.source.spiffe_id }}"
+    approval:
+      required_if_confidence_below: 0.95
+      approvers: ["sec-oncall", "platform-oncall"]
+    cooldown: 15m
+
+  - id: isolate-pod-privesc
+    trigger_rule: 2b3c4d5e-6f7g-8h9i-0j1k-2l3m4n5o6p7q   # privilege-escalation.yml
+    description: Network-isolate the pod attempting privilege escalation
+    actions:
+      - type: k8s_apply_networkpolicy
+        params:
+          namespace: "{{ event.kubernetes.namespace }}"
+          pod: "{{ event.kubernetes.pod.name }}"
+          policy: deny-all-egress
+      - type: k8s_label_pod
+        params:
+          namespace: "{{ event.kubernetes.namespace }}"
+          pod: "{{ event.kubernetes.pod.name }}"
+          labels:
+            quarantine: "true"
+            quarantine.reason: "privilege-escalation"
+            quarantine.incident: "{{ event.id }}"
+      - type: page
+        team: sec-oncall
+        severity: high
+    approval:
+      required_if_confidence_below: 1.0   # always require human ack for pod isolation
+      approvers: ["sec-oncall"]
+    cooldown: 30m
+
+  - id: ratelimit-model-extraction
+    trigger_rule: 8f3b2c5a-9e1d-4a8f-b6c2-3d5e7f8a9b0c   # model-extraction.yml
+    description: Drop per-tenant rate-limit on suspected model-extraction
+    actions:
+      - type: gateway_rate_limit
+        params:
+          tenant: "{{ event.user.id }}"
+          rps: 1
+          ttl: 1h
+      - type: revoke_api_key
+        params:
+          key_id: "{{ event.user.api_key_id }}"
+        condition: "{{ event.confidence > 0.95 }}"
+      - type: notify
+        channel: "#sec-incident"
+        message: "Throttled tenant {{ event.user.id }} for suspected model extraction"
+    approval:
+      required_if_confidence_below: 0.85
+      approvers: ["sec-oncall"]
+    cooldown: 10m
+
+runner:
+  engine: stackstorm
+  audit_log: /var/log/soar/actions.jsonl
+  dry_run: false
+  max_concurrent: 10

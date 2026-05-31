@@ -1,0 +1,85 @@
+# Threat-intel feed configuration.
+#
+# Pulls indicators from STIX/TAXII servers + advisory feeds, normalizes to
+# the SIEM's IOC index, and exposes them for correlation against detections.
+
+feeds:
+
+  - name: cisa-kev
+    description: CISA Known Exploited Vulnerabilities catalog
+    type: http_json
+    url: https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
+    poll_interval: 1h
+    parser: cisa_kev
+    output_index: ti-cisa-kev
+    correlations:
+      - match_field: vulnerability.id     # CVE in event matches KEV CVE
+        priority_boost: 2
+
+  - name: cisa-taxii
+    description: CISA Automated Indicator Sharing (AIS) STIX 2.1 feed
+    type: taxii2
+    url: https://cti-taxii.mitre.org/taxii/
+    collection: cisa-ais-public
+    poll_interval: 15m
+    auth:
+      method: api_key
+      key_env: CISA_TAXII_API_KEY
+    output_index: ti-cisa-stix
+
+  - name: mitre-atlas
+    description: MITRE ATLAS — adversarial ML technique catalog + case studies
+    type: http_json
+    url: https://atlas.mitre.org/api/data.json
+    poll_interval: 24h
+    parser: atlas_techniques
+    output_index: ti-mitre-atlas
+    use_for:
+      - sigma_rule_tagging        # attach ATLAS technique IDs to detections
+      - tabletop_scenario_seed
+
+  - name: vendor-anthropic-advisories
+    description: Anthropic / model-vendor security advisories
+    type: rss
+    url: https://www.anthropic.com/security/advisories.rss
+    poll_interval: 6h
+    output_index: ti-vendor-advisories
+
+  - name: vendor-openai-advisories
+    description: OpenAI platform security advisories
+    type: rss
+    url: https://status.openai.com/history.rss
+    poll_interval: 6h
+    output_index: ti-vendor-advisories
+
+  - name: commercial-stix
+    description: Commercial threat-intel feed (e.g. Recorded Future / Mandiant)
+    type: taxii2
+    url: https://api.recordedfuture.com/taxii/
+    collection: high-confidence-iocs
+    poll_interval: 15m
+    auth:
+      method: bearer
+      token_env: RF_API_TOKEN
+    output_index: ti-commercial-stix
+
+correlation:
+  enabled: true
+  match_fields:
+    - source.ip
+    - destination.ip
+    - file.hash.sha256
+    - url.full
+    - vulnerability.id
+  enrich_alert_with:
+    - feed_name
+    - confidence
+    - first_seen
+    - last_seen
+    - associated_actor
+
+retention:
+  default_days: 180
+  by_feed:
+    cisa-kev: 1825        # KEV catalog retained 5y for compliance audits
+    mitre-atlas: 1825

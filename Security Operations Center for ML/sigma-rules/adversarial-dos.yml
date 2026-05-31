@@ -1,0 +1,29 @@
+title: Adversarial query pattern causing inference degradation
+id: 4d65c2e3-8a4b-4c1d-9f6a-2b5e7c8d9a10
+status: stable
+description: |
+  Detects distributed high-cost inference requests with out-of-distribution or
+  heavily perturbed inputs that degrade model latency and throughput.
+references:
+  - https://atlas.mitre.org/techniques/AML.T0029
+author: ml-soc
+date: 2026-05-31
+logsource:
+  product: ml-platform
+  service: inference-gateway
+detection:
+  degradation:
+    model.p99_latency_ratio_5m: '>5'
+    model.gpu_utilization_pct: '>95'
+    model.throughput_ratio_5m: '<0.7'
+  adversarial_pattern:
+    request.source_ip_count_5m: '>100'
+    request.ood_score_p95_5m: '>0.9'
+    request.avg_compute_ms_5m: '>500'
+  condition: degradation and adversarial_pattern
+falsepositives:
+  - coordinated load test with adversarial evaluation enabled
+level: critical
+tags:
+  - attack.t1499
+  - atlas.t0029
