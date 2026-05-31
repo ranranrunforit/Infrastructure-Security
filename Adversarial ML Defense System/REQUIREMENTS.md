@@ -1,7 +1,5 @@
 # Project 3: Adversarial ML Defense System
 
-**Duration**: 130 hours
-
 ## Goal
 
 Defend production ML models against adversarial attacks:
