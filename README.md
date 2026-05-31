@@ -21,7 +21,7 @@ The projects are intentionally practical and control-focused. They emphasize Kub
 
 ## Project Details
 
-### 1. Zero-Trust ML Infrastructure
+### 1. [Zero-Trust ML Infrastructure](/Zero-Trust%20ML%20Infrastructure) 
 
 Builds a Kubernetes-based zero-trust reference implementation for ML workloads where service-to-service and tenant-to-platform interactions are authenticated, authorized, encrypted, and auditable.
 
@@ -49,7 +49,7 @@ Builds a Kubernetes-based zero-trust reference implementation for ML workloads w
 - Penetration validation script for expected blocked or detected attacks
 
 
-### 2. Compliance Framework for ML Systems
+### 2. [Compliance Framework for ML Systems](/Compliance%20Framework%20for%20ML%20Systems)
 
 Implements a lightweight compliance framework for ML systems, focused on data classification, GDPR subject rights, audit integrity, column-level lineage, fairness review gates, and quarterly compliance reporting.
 
@@ -74,7 +74,7 @@ Implements a lightweight compliance framework for ML systems, focused on data cl
 - Quarterly GDPR, HIPAA, and SOC 2 report generator
 
 
-### 3. Adversarial ML Defense System
+### 3. [Adversarial ML Defense System](/Adversarial%20ML%20Defense%20System)
 
 Provides reusable Python modules for testing and defending ML models against evasion, poisoning, extraction, membership inference, backdoor, and NLP adversarial attacks.
 
@@ -108,7 +108,7 @@ Provides reusable Python modules for testing and defending ML models against eva
 - Benchmark metrics for robustness, rejection rate, extraction agreement, membership inference accuracy, backdoor success, and watermark ownership
 
 
-### 4. Secure ML CI/CD Pipeline
+### 4. [Secure ML CI/CD Pipeline](/Secure%20ML%20CICD%20Pipeline)
 
 Implements a secure CI/CD and GitOps reference pipeline for ML workloads, focused on supply-chain verification before artifacts are promoted or admitted into a Kubernetes cluster.
 
@@ -141,7 +141,7 @@ Implements a secure CI/CD and GitOps reference pipeline for ML workloads, focuse
 - Bypass tests for admission and model verification gates
 
 
-### 5. Security Operations Center for ML
+### 5. [Security Operations Center for ML](/Security%20Operations%20Center%20for%20ML)
 
 Defines a lightweight SOC operating model for ML platforms, covering log collection, Sigma detections, alert routing, automated response, threat intelligence, incident playbooks, tabletop exercises, and blameless postmortems.
 
@@ -197,8 +197,3 @@ Infrastructure-Security/
 | ML supply-chain security | [Secure ML CI/CD Pipeline](/Secure%20ML%20CICD%20Pipeline) |
 | Detection and incident response | [Security Operations Center for ML](/Security%20Operations%20Center%20for%20ML) |
 
-## Notes
-
-- The main README summarizes the current subfolder READMEs and does not replace the detailed project documentation.
-- Some projects are lightweight reference implementations rather than full production platform installers.
-- Optional dependencies are project-specific; check each subfolder README before running its code or manifests.
