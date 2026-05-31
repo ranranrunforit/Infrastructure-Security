@@ -13,7 +13,7 @@ Build a comprehensive zero-trust security architecture implementing "never trust
 - Runtime security monitoring
 - 15+ OPA compliance policies
 
-### Project 2: [Compliance Framework for ML Systems](projects/project-2-compliance/)
+### Project 2: [Compliance Framework for ML Systems](/Compliance%20Framework%20for%20ML%20Systems/)
 
 Automate compliance verification for GDPR, HIPAA, and SOC 2 with immutable audit logs and data subject rights workflows.
 
@@ -40,7 +40,7 @@ Defend ML models from adversarial attacks including evasion, poisoning, extracti
 - Model extraction protection
 - Automated security testing suite
 
-### Project 4: [Secure ML CI/CD Pipeline](projects/project-4-secure-cicd/)
+### Project 4: [Secure ML CI/CD Pipeline](/Secure%20ML%20CICD%20Pipeline/)
 
 Implement secure software supply chain for ML with 15+ security gates and SLSA Level 3 compliance.
 
@@ -54,7 +54,7 @@ Implement secure software supply chain for ML with 15+ security gates and SLSA L
 - Model security scanning
 - Continuous compliance monitoring
 
-### Project 5: [Security Operations Center for ML](projects/project-5-security-operations/)
+### Project 5: [Security Operations Center for ML](/Security%20Operations%20Center%20for%20ML/)
 
 Build ML-focused SOC with SIEM, threat detection, incident response, and security analytics.
 
