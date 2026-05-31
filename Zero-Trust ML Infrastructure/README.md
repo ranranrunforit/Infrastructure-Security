@@ -37,64 +37,63 @@ Zero-Trust ML Infrastructure/
 |-- README.md                       # Project overview and usage guide
 |-- REQUIREMENTS.md                 # Project requirements
 |-- ARCHITECTURE.md                 # Zero-trust architecture notes
-|-- SOLUTION.md                     # Implementation summary
 |-- terraform/                      # VPC + EKS + audit S3 + IAM (IRSA)
-|   |-- versions.tf
-|   |-- variables.tf
-|   |-- main.tf
-|   |-- vpc.tf
-|   |-- eks.tf
+|   |-- versions.tf                 # Terraform and provider version constraints
+|   |-- variables.tf                # Cluster, VPC, node, audit bucket inputs
+|   |-- main.tf                     # AWS/Kubernetes/Helm provider configuration
+|   |-- vpc.tf                      # VPC, private/public subnets, flow logs
+|   |-- eks.tf                      # EKS cluster, node group, audit log enablement
 |   |-- audit-storage.tf            # S3 + Object Lock (COMPLIANCE) + IAM
-|   `-- outputs.tf
+|   `-- outputs.tf                  # Cluster, bucket, and IRSA role outputs
 |-- helm/                           # Install Cilium, Istio, SPIRE, Vault,
 |   |-- install.sh                  #   ESO, Kyverno, and Falco via Helm.
-|   |-- cilium-values.yaml
-|   |-- istio-base-values.yaml
-|   |-- istiod-values.yaml
-|   |-- spire-values.yaml
-|   |-- vault-values.yaml
-|   |-- external-secrets-values.yaml
-|   |-- kyverno-values.yaml
-|   `-- falco-values.yaml
-|-- app/
-|   |-- iris-api/
+|   |-- cilium-values.yaml          # WireGuard encryption + kube-proxy replacement
+|   |-- istio-base-values.yaml      # Istio CRD/base chart values
+|   |-- istiod-values.yaml          # Istio control plane and trust domain values
+|   |-- spire-values.yaml           # SPIRE trust domain and workload identity values
+|   |-- vault-values.yaml           # Vault HA Raft values
+|   |-- external-secrets-values.yaml # ESO controller values
+|   |-- kyverno-values.yaml         # Kyverno HA and failurePolicy settings
+|   `-- falco-values.yaml           # Falco modern eBPF and JSON output values
+|-- app/                            # Minimal protected ML application
+|   |-- iris-api/                   # Inference service source and image build
 |   |   |-- app.py                  # Minimal ML inference API
-|   |   `-- Dockerfile
-|   |-- kubernetes/
+|   |   `-- Dockerfile              # Non-root Python runtime image
+|   |-- kubernetes/                 # Kubernetes manifests for the ML service
 |   |   |-- iris-api.yaml           # Namespace, ServiceAccount, Deployment, Service
 |   |   `-- ingress-gateway.yaml    # Istio Gateway + VirtualService
 |   `-- deploy.sh                   # render signed image digest and deploy app
-|-- network-policies/
+|-- network-policies/               # Cilium microsegmentation policies
 |   `-- default-deny-and-allow.yaml # Cilium default-deny and allow policies
-|-- istio/
+|-- istio/                          # Mesh mTLS and service authorization
 |   |-- peer-authentication.yaml    # Mesh-wide STRICT mTLS
 |   |-- authz-policy.yaml           # Istio service authorization policy
 |   `-- destination-rule.yaml       # Mutual TLS destination rules
-|-- spire/
+|-- spire/                          # Standalone SPIRE reference manifests
 |   |-- server.yaml                 # SPIRE server configuration
 |   `-- workload-attestor.yaml      # Kubernetes workload attestation
-|-- secrets/
+|-- secrets/                        # Vault-backed Kubernetes secret references
 |   `-- vault-eso.yaml              # Vault and External Secrets references
-|-- policies/
+|-- policies/                       # Admission-time security policy
 |   `-- kyverno-zero-trust.yaml     # Kyverno admission controls
-|-- falco-rules/
+|-- falco-rules/                    # Runtime detection rules
 |   `-- ml-platform.yaml            # Runtime detection rules for ML pods
-|-- audit/
+|-- audit/                          # Audit policy and integrity verification
 |   |-- audit-policy.yaml           # Kubernetes audit policy
 |   |-- hash-chain.py               # Tamper-evident audit verifier
-|   `-- long-term-storage/
+|   `-- long-term-storage/          # S3 Object Lock forwarding and verification
 |       |-- audit-forwarder.yaml    # fluent-bit audit/falco -> S3 Object Lock
 |       |-- deploy.sh               # render Terraform outputs into forwarder manifest
 |       |-- commit-chain.sh         # commit a chain for a closed audit window
 |       `-- verify.sh               # pull objects + verify existing hash chain
-|-- benchmarks/
-|   |-- README.md
-|   |-- performance/
-|   |   |-- measure-p95.py
-|   |   `-- compare.sh
-|   `-- cost/
-|       `-- compare.sh
-`-- tests/
+|-- benchmarks/                     # NFR-001/NFR-002 measurement scripts
+|   |-- README.md                   # Benchmark usage notes
+|   |-- performance/                # p95 latency measurement
+|   |   |-- measure-p95.py          # Single endpoint p50/p95/max probe
+|   |   `-- compare.sh              # Baseline vs mesh p95 overhead check
+|   `-- cost/                       # Infrastructure cost comparison
+|       `-- compare.sh              # Baseline vs zero-trust monthly cost check
+`-- tests/                          # Acceptance and penetration checks
     `-- penetration.sh              # Penetration validation script
 ```
 
@@ -394,3 +393,12 @@ benchmark harnesses. It still does not include:
 
 - real signed production image digests
 - collected benchmark result files from a live cluster
+
+The signed image digest is intentionally injected at deploy time through
+`SIGNED_IMAGE_DIGEST`, because a real digest only exists after the image is
+built, pushed, and signed by the release pipeline.
+
+Benchmark result files are generated by the scripts in `benchmarks/` when they
+run against a live baseline cluster and the zero-trust cluster. Static result
+files are not committed because they would not prove the current deployment's
+NFR-001 or NFR-002 status.
