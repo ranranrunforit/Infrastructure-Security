@@ -91,18 +91,7 @@ Implements a secure CI/CD and GitOps reference pipeline for ML workloads, focuse
 
 **Technologies**
 
-- GitHub Actions
-- CodeQL
-- TruffleHog
-- Trivy
-- Grype
-- CycloneDX SBOM
-- Cosign/Sigstore
-- SLSA provenance
-- Kyverno
-- ArgoCD
-- OCI registries and GHCR
-- Bash
+GitHub Actions, CodeQL, TruffleHog, Trivy, Grype, CycloneDX SBOM, Cosign/Sigstore, SLSA provenance, Kyverno, ArgoCD, OCI registries and GHCR, Bash
 
 **Deliverables**
 
