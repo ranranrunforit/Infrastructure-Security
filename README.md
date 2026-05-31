@@ -66,16 +66,7 @@ Provides reusable Python modules for testing and defending ML models against eva
 
 **Technologies**
 
-- Python
-- PyTorch
-- NumPy
-- scikit-learn
-- FastAPI
-- Redis
-- Opacus
-- Adversarial Robustness Toolbox
-- Foolbox
-- TextAttack
+Python, PyTorch, NumPy, scikit-learn, FastAPI, Redis, Opacus, Adversarial Robustness Toolbox, Foolbox, TextAttack
 
 **Deliverables**
 
