@@ -18,28 +18,28 @@ The implemented controls cover:
 
 ```text
 Secure ML CICD Pipeline/
-|-- README.md
-|-- REQUIREMENTS.md
+|-- README.md                       # Project overview and usage guide
+|-- REQUIREMENTS.md                 # Project requirements
 |-- .github/
-|   |-- branch-protection.md
+|   |-- branch-protection.md        # Required branch protection controls
 |   `-- workflows/
-|       `-- secure-pipeline.yml
+|       `-- secure-pipeline.yml     # Secure build, scan, signing, and attestation workflow
 |-- argocd/
-|   |-- app-of-apps.yaml
+|   |-- app-of-apps.yaml            # ArgoCD app-of-apps entry point
 |   `-- apps/
-|       |-- kyverno-policies.yaml
-|       `-- ml-serving.yaml
+|       |-- kyverno-policies.yaml   # GitOps app for Kyverno policies
+|       `-- ml-serving.yaml         # GitOps app for ML serving manifests
 |-- ci-examples/
-|   `-- secure-pipeline.yml
+|   `-- secure-pipeline.yml         # Reusable copy of the secure pipeline
 |-- kyverno/
-|   |-- verify-image-signature.yaml
-|   |-- verify-sbom-attestation.yaml
-|   `-- verify-slsa-provenance.yaml
+|   |-- verify-image-signature.yaml # Admission policy for signed images
+|   |-- verify-sbom-attestation.yaml # Admission policy for SBOM attestations
+|   `-- verify-slsa-provenance.yaml # Admission policy for SLSA provenance
 |-- model-signing/
-|   |-- sign_model.sh
-|   `-- verify_model.sh
+|   |-- sign_model.sh               # Model artifact signing script
+|   `-- verify_model.sh             # Model artifact verification script
 `-- tests/
-    `-- bypass_attempts.sh
+    `-- bypass_attempts.sh          # Admission and model gate bypass tests
 ```
 
 ## CI Pipeline
