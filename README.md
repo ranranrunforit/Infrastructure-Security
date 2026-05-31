@@ -47,13 +47,7 @@ Implements a lightweight compliance framework for ML systems, focused on data cl
 
 **Technologies**
 
-- Python
-- pandas
-- FastAPI
-- Kyverno
-- JSONL audit logging
-- Hash-chain integrity verification
-- Markdown report generation
+Python, pandas, FastAPI, Kyverno, JSONL audit logging, hash-chain integrity verification, Markdown report generation
 
 **Deliverables**
 
