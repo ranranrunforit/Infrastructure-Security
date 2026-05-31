@@ -1,7 +1,5 @@
 # Project 2: Compliance Framework for ML Systems
 
-**Duration**: 120 hours
-
 ## Goal
 
 Automate compliance for GDPR + HIPAA + SOC 2 + EU AI Act on an ML platform.
