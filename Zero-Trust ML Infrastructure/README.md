@@ -33,10 +33,10 @@ admission.
 ## Repository Layout
 
 ```text
-.
-|-- ARCHITECTURE.md
-|-- REQUIREMENTS.md
+Zero-Trust ML Infrastructure/
 |-- README.md
+|-- REQUIREMENTS.md
+|-- ARCHITECTURE.md
 |-- network-policies/
 |   `-- default-deny-and-allow.yaml
 |-- istio/
