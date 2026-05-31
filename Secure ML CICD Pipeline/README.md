@@ -17,29 +17,29 @@ The implemented controls cover:
 ## Repository Layout
 
 ```text
-.
-+-- .github/
-|   +-- branch-protection.md
-|   +-- workflows/
-|       +-- secure-pipeline.yml
-+-- argocd/
-|   +-- app-of-apps.yaml
-|   +-- apps/
-|       +-- kyverno-policies.yaml
-|       +-- ml-serving.yaml
-+-- ci-examples/
-|   +-- secure-pipeline.yml
-+-- kyverno/
-|   +-- verify-image-signature.yaml
-|   +-- verify-sbom-attestation.yaml
-|   +-- verify-slsa-provenance.yaml
-+-- model-signing/
-|   +-- sign_model.sh
-|   +-- verify_model.sh
-+-- tests/
-|   +-- bypass_attempts.sh
-+-- REQUIREMENTS.md
-+-- README.md
+Secure ML CICD Pipeline/
+|-- README.md
+|-- REQUIREMENTS.md
+|-- .github/
+|   |-- branch-protection.md
+|   `-- workflows/
+|       `-- secure-pipeline.yml
+|-- argocd/
+|   |-- app-of-apps.yaml
+|   `-- apps/
+|       |-- kyverno-policies.yaml
+|       `-- ml-serving.yaml
+|-- ci-examples/
+|   `-- secure-pipeline.yml
+|-- kyverno/
+|   |-- verify-image-signature.yaml
+|   |-- verify-sbom-attestation.yaml
+|   `-- verify-slsa-provenance.yaml
+|-- model-signing/
+|   |-- sign_model.sh
+|   `-- verify_model.sh
+`-- tests/
+    `-- bypass_attempts.sh
 ```
 
 ## CI Pipeline
