@@ -113,17 +113,7 @@ Defines a lightweight SOC operating model for ML platforms, covering log collect
 
 **Technologies**
 
-- Sigma detection rules
-- SIEM log-source configuration with ECS-style fields
-- Kubernetes audit logs
-- Falco runtime alerts
-- Vault audit logs
-- Service mesh access logs
-- MITRE ATT&CK and MITRE ATLAS mappings
-- SOAR-style response configuration
-- STIX/TAXII threat intelligence feeds
-- Slack and paging-based alert routing
-- Bash tabletop injection scripts
+Sigma detection rules, SIEM log-source configuration with ECS-style fields, Kubernetes audit logs, Falco runtime alerts, Vault audit logs, service mesh access logs, MITRE ATT&CK and MITRE ATLAS mappings, SOAR-style response configuration, STIX/TAXII threat intelligence feeds, Slack and paging-based alert routing, Bash tabletop injection scripts
 
 **Deliverables**
 
