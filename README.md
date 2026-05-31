@@ -1,7 +1,6 @@
 ## Projects
 
-### Project 1: Zero-Trust ML Infrastructure
-[View Project →](projects/project-1-zero-trust/)
+### Project 1: [Zero-Trust ML Infrastructure](/Adversarial%20ML%20Defense%20System/)
 
 Build a comprehensive zero-trust security architecture implementing "never trust, always verify" principles across all ML infrastructure layers.
 
@@ -13,8 +12,7 @@ Build a comprehensive zero-trust security architecture implementing "never trust
 - Runtime security monitoring
 - 15+ OPA compliance policies
 
-### Project 2: Compliance Framework for ML Systems
-[View Project →](projects/project-2-compliance/)
+### Project 2: [Compliance Framework for ML Systems](projects/project-2-compliance/)
 
 Automate compliance verification for GDPR, HIPAA, and SOC 2 with immutable audit logs and data subject rights workflows.
 
@@ -26,8 +24,7 @@ Automate compliance verification for GDPR, HIPAA, and SOC 2 with immutable audit
 - Data classification and encryption automation
 - Real-time compliance dashboards
 
-### Project 3: Adversarial ML Defense System
-[View Project →](projects/project-3-adversarial-defense/)
+### Project 3: [Adversarial ML Defense System](projects/project-3-adversarial-defense/)
 
 Defend ML models from adversarial attacks including evasion, poisoning, extraction, backdoors, and privacy attacks.
 
@@ -40,8 +37,7 @@ Defend ML models from adversarial attacks including evasion, poisoning, extracti
 - Model extraction protection
 - Automated security testing suite
 
-### Project 4: Secure ML CI/CD Pipeline
-[View Project →](projects/project-4-secure-cicd/)
+### Project 4: [Secure ML CI/CD Pipeline](projects/project-4-secure-cicd/)
 
 Implement secure software supply chain for ML with 15+ security gates and SLSA Level 3 compliance.
 
@@ -54,8 +50,7 @@ Implement secure software supply chain for ML with 15+ security gates and SLSA L
 - Model security scanning
 - Continuous compliance monitoring
 
-### Project 5: Security Operations Center for ML
-[View Project →](projects/project-5-security-operations/)
+### Project 5: [Security Operations Center for ML](projects/project-5-security-operations/)
 
 Build ML-focused SOC with SIEM, threat detection, incident response, and security analytics.
 
