@@ -17,29 +17,29 @@ The SOC is designed to detect and respond to:
 
 ```
 Security Operations Center for ML/
-|-- README.md
-|-- REQUIREMENTS.md
+|-- README.md                       # Project overview and usage guide
+|-- REQUIREMENTS.md                 # Project requirements
 |-- siem/
-|   |-- log-sources.yml
-|   `-- alert-routing.yml
+|   |-- log-sources.yml             # SIEM log source definitions
+|   `-- alert-routing.yml           # Paging, escalation, and notification routing
 |-- sigma-rules/
-|   |-- lateral-movement.yml
-|   |-- privilege-escalation.yml
-|   |-- data-exfiltration.yml
-|   |-- model-extraction.yml
-|   `-- adversarial-dos.yml
+|   |-- lateral-movement.yml        # Lateral movement detection rule
+|   |-- privilege-escalation.yml    # Privilege escalation detection rule
+|   |-- data-exfiltration.yml       # Sensitive data exfiltration detection rule
+|   |-- model-extraction.yml        # Model theft and extraction detection rule
+|   `-- adversarial-dos.yml         # Adversarial inference DoS detection rule
 |-- soar/
-|   `-- automated-response.yml
+|   `-- automated-response.yml      # Automated response action mappings
 |-- threat-intel/
-|   `-- feeds.yml
+|   `-- feeds.yml                   # Threat intelligence feed configuration
 |-- playbooks/
-|   |-- model-theft.md
-|   |-- data-poisoning.md
-|   `-- adversarial-dos.md
+|   |-- model-theft.md              # Model theft incident response playbook
+|   |-- data-poisoning.md           # Data poisoning incident response playbook
+|   `-- adversarial-dos.md          # Adversarial DoS incident response playbook
 |-- tabletop/
-|   |-- q1-tabletop.md
-|   `-- injection-scripts.sh
-`-- postmortem-template.md
+|   |-- q1-tabletop.md              # Quarterly tabletop exercise
+|   `-- injection-scripts.sh        # Incident-signal injection script
+`-- postmortem-template.md          # Blameless postmortem template
 ```
 
 ## SIEM
