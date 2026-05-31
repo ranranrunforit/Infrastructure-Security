@@ -14,12 +14,6 @@ CI/CD pipeline for ML that's secure end-to-end:
 - Deploy: GitOps via ArgoCD; promotion is git-only
 - Audit: every action recorded; immutable
 
-## Cross-references
-
-- engineer-solutions/mod-103 ex-10 (SBOM + supply chain)
-- engineer-solutions/mod-103 ex-12 (vulnerability remediation)
-- engineer-solutions/mod-109 ex-06 (GitOps with ArgoCD)
-- engineer-solutions/mod-109 ex-08 (policy as code)
 
 ## Deliverables
 
