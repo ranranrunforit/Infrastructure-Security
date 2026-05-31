@@ -37,7 +37,6 @@ admission.
 |-- ARCHITECTURE.md
 |-- REQUIREMENTS.md
 |-- README.md
-|-- SOLUTION.md
 |-- network-policies/
 |   `-- default-deny-and-allow.yaml
 |-- istio/
