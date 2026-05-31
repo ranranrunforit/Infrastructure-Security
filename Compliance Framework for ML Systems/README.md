@@ -26,7 +26,6 @@ warehouse, feature store, model registry, or audit backend.
 Compliance Framework for ML Systems/
 |-- README.md
 |-- REQUIREMENTS.md
-|-- SOLUTION.md
 |-- audit/
 |   `-- log.py                       # tamper-evident audit log
 |-- data_inventory/
