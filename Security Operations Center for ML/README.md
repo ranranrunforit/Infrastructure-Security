@@ -1,6 +1,6 @@
-# Project 5 Solution - Security Operations Center
+# Project 5 Security Operations Center
 
-Reference for [learning project 5](https://github.com/ai-infra-curriculum/ai-infra-security-learning/tree/main/projects/project-5-security-operations).
+
 
 ## Layout
 
@@ -30,6 +30,3 @@ project-5-security-operations/
 `-- postmortem-template.md
 ```
 
-Cross-references:
-- [engineer-solutions/mod-108 ex-09 gameday](https://github.com/ai-infra-curriculum/ai-infra-engineer-solutions/tree/main/modules/mod-108-monitoring-observability/exercise-09-incident-response-gameday) - fault-injection scripts
-- [engineer-solutions/mod-108 ex-07](https://github.com/ai-infra-curriculum/ai-infra-engineer-solutions/tree/main/modules/mod-108-monitoring-observability/exercise-07-alertmanager-routing) - alert routing
