@@ -2,7 +2,6 @@
 
 Security-focused AI/ML infrastructure projects covering zero-trust platform controls, compliance automation, adversarial ML defense, secure ML CI/CD, and ML security operations.
 
-Repository: [https://github.com/ranranrunforit/Infrastructure-Security](https://github.com/ranranrunforit/Infrastructure-Security)
 
 ## Overview
 
@@ -14,11 +13,11 @@ The projects are intentionally practical and control-focused. They emphasize Kub
 
 | Project | Focus | Link |
 |---|---|---|
-| Zero-Trust ML Infrastructure | Kubernetes zero-trust controls for ML workloads | [Zero-Trust ML Infrastructure](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Zero-Trust%20ML%20Infrastructure) |
-| Compliance Framework for ML Systems | GDPR, HIPAA, SOC 2, audit, lineage, and fairness controls | [Compliance Framework for ML Systems](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Compliance%20Framework%20for%20ML%20Systems) |
-| Adversarial ML Defense System | Attack and defense utilities for adversarial ML threats | [Adversarial ML Defense System](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Adversarial%20ML%20Defense%20System) |
-| Secure ML CI/CD Pipeline | Secure software supply chain and admission controls for ML workloads | [Secure ML CI/CD Pipeline](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Secure%20ML%20CICD%20Pipeline) |
-| Security Operations Center for ML | ML-focused detection, response, threat intelligence, and incident operations | [Security Operations Center for ML](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Security%20Operations%20Center%20for%20ML) |
+| Zero-Trust ML Infrastructure | Kubernetes zero-trust controls for ML workloads | [Zero-Trust ML Infrastructure](/Zero-Trust%20ML%20Infrastructure) |
+| Compliance Framework for ML Systems | GDPR, HIPAA, SOC 2, audit, lineage, and fairness controls | [Compliance Framework for ML Systems](/Compliance%20Framework%20for%20ML%20Systems) |
+| Adversarial ML Defense System | Attack and defense utilities for adversarial ML threats | [Adversarial ML Defense System](/Adversarial%20ML%20Defense%20System) |
+| Secure ML CI/CD Pipeline | Secure software supply chain and admission controls for ML workloads | [Secure ML CI/CD Pipeline](/Secure%20ML%20CICD%20Pipeline) |
+| Security Operations Center for ML | ML-focused detection, response, threat intelligence, and incident operations | [Security Operations Center for ML](/Security%20Operations%20Center%20for%20ML) |
 
 ## Project Details
 
@@ -49,7 +48,6 @@ Builds a Kubernetes-based zero-trust reference implementation for ML workloads w
 - Kubernetes audit policy and tamper-evident audit hash-chain verifier
 - Penetration validation script for expected blocked or detected attacks
 
-Project README: [Zero-Trust ML Infrastructure](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Zero-Trust%20ML%20Infrastructure)
 
 ### 2. Compliance Framework for ML Systems
 
@@ -75,7 +73,6 @@ Implements a lightweight compliance framework for ML systems, focused on data cl
 - Production promotion gate requiring approved fairness review
 - Quarterly GDPR, HIPAA, and SOC 2 report generator
 
-Project README: [Compliance Framework for ML Systems](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Compliance%20Framework%20for%20ML%20Systems)
 
 ### 3. Adversarial ML Defense System
 
@@ -110,7 +107,6 @@ Provides reusable Python modules for testing and defending ML models against eva
 - Trigger-set watermark embedding and verification
 - Benchmark metrics for robustness, rejection rate, extraction agreement, membership inference accuracy, backdoor success, and watermark ownership
 
-Project README: [Adversarial ML Defense System](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Adversarial%20ML%20Defense%20System)
 
 ### 4. Secure ML CI/CD Pipeline
 
@@ -144,7 +140,6 @@ Implements a secure CI/CD and GitOps reference pipeline for ML workloads, focuse
 - ArgoCD app-of-apps GitOps deployment configuration
 - Bypass tests for admission and model verification gates
 
-Project README: [Secure ML CI/CD Pipeline](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Secure%20ML%20CICD%20Pipeline)
 
 ### 5. Security Operations Center for ML
 
@@ -175,7 +170,6 @@ Defines a lightweight SOC operating model for ML platforms, covering log collect
 - Quarterly tabletop exercise scenario and injection script
 - Blameless postmortem template
 
-Project README: [Security Operations Center for ML](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Security%20Operations%20Center%20for%20ML)
 
 ## Repository Structure
 
@@ -193,15 +187,15 @@ Infrastructure-Security/
 
 | Security Area | Covered By |
 |---|---|
-| Network microsegmentation | [Zero-Trust ML Infrastructure](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Zero-Trust%20ML%20Infrastructure) |
-| Service identity and mTLS | [Zero-Trust ML Infrastructure](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Zero-Trust%20ML%20Infrastructure) |
-| Secrets management | [Zero-Trust ML Infrastructure](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Zero-Trust%20ML%20Infrastructure), [Security Operations Center for ML](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Security%20Operations%20Center%20for%20ML) |
-| Admission control | [Zero-Trust ML Infrastructure](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Zero-Trust%20ML%20Infrastructure), [Secure ML CI/CD Pipeline](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Secure%20ML%20CICD%20Pipeline) |
-| Audit integrity | [Zero-Trust ML Infrastructure](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Zero-Trust%20ML%20Infrastructure), [Compliance Framework for ML Systems](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Compliance%20Framework%20for%20ML%20Systems) |
-| GDPR, HIPAA, and SOC 2 workflows | [Compliance Framework for ML Systems](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Compliance%20Framework%20for%20ML%20Systems) |
-| Adversarial ML defense | [Adversarial ML Defense System](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Adversarial%20ML%20Defense%20System) |
-| ML supply-chain security | [Secure ML CI/CD Pipeline](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Secure%20ML%20CICD%20Pipeline) |
-| Detection and incident response | [Security Operations Center for ML](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Security%20Operations%20Center%20for%20ML) |
+| Network microsegmentation | [Zero-Trust ML Infrastructure](/Zero-Trust%20ML%20Infrastructure) |
+| Service identity and mTLS | [Zero-Trust ML Infrastructure](/Zero-Trust%20ML%20Infrastructure) |
+| Secrets management | [Zero-Trust ML Infrastructure](/Zero-Trust%20ML%20Infrastructure), [Security Operations Center for ML](/Security%20Operations%20Center%20for%20ML) |
+| Admission control | [Zero-Trust ML Infrastructure](/Zero-Trust%20ML%20Infrastructure), [Secure ML CI/CD Pipeline](https://github.com/ranranrunforit/Infrastructure-Security/tree/main/Secure%20ML%20CICD%20Pipeline) |
+| Audit integrity | [Zero-Trust ML Infrastructure](/Zero-Trust%20ML%20Infrastructure), [Compliance Framework for ML Systems](/Compliance%20Framework%20for%20ML%20Systems) |
+| GDPR, HIPAA, and SOC 2 workflows | [Compliance Framework for ML Systems](/Compliance%20Framework%20for%20ML%20Systems) |
+| Adversarial ML defense | [Adversarial ML Defense System](/Adversarial%20ML%20Defense%20System) |
+| ML supply-chain security | [Secure ML CI/CD Pipeline](/Secure%20ML%20CICD%20Pipeline) |
+| Detection and incident response | [Security Operations Center for ML](/Security%20Operations%20Center%20for%20ML) |
 
 ## Notes
 
