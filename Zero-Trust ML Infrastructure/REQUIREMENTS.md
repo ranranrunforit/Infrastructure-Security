@@ -1,6 +1,6 @@
 # Project 1: Zero-Trust ML Infrastructure
 
-**Duration**: 140 hours
+
 **Prerequisites**: Senior infra engineer + Kubernetes + networking fundamentals
 
 ## Goal
