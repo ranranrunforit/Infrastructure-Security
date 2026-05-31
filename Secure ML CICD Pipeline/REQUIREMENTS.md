@@ -1,7 +1,5 @@
 # Project 4: Secure ML CI/CD Pipeline
 
-**Duration**: 100 hours
-
 ## Goal
 
 CI/CD pipeline for ML that's secure end-to-end:
