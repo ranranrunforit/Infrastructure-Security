@@ -5,7 +5,7 @@ Security-focused AI/ML infrastructure projects covering zero-trust platform cont
 
 ## Overview
 
-This repository contains five infrastructure security implementations for machine learning systems. Each subfolder includes its own README with implementation details, requirement coverage, and usage notes.
+This repository contains five infrastructure security implementations for machine learning systems. 
 
 The projects are intentionally practical and control-focused. They emphasize Kubernetes security, service identity, policy enforcement, auditability, compliance workflows, adversarial ML defenses, supply-chain integrity, and security operations for ML platforms.
 
