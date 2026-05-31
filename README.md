@@ -27,15 +27,7 @@ Builds a Kubernetes-based zero-trust reference implementation for ML workloads w
 
 **Technologies**
 
-- Kubernetes
-- Cilium NetworkPolicy
-- Istio mTLS and AuthorizationPolicy
-- SPIFFE/SPIRE workload identity
-- HashiCorp Vault
-- External Secrets Operator
-- Kyverno
-- Falco
-- Python and Bash validation utilities
+Kubernetes, Cilium NetworkPolicy, Istio mTLS and AuthorizationPolicy, SPIFFE/SPIRE workload identity, HashiCorp Vault, External Secrets Operator, Kyverno, Falco, Python and Bash validation utilities
 
 **Deliverables**
 
