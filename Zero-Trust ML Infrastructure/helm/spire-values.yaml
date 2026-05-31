@@ -1,0 +1,22 @@
+global:
+  spire:
+    trustDomain: ml-platform.local
+    clusterName: ml-platform
+
+spire-server:
+  ca_ttl: 168h
+  caTTL: 168h
+  controllerManager:
+    identities:
+      clusterSPIFFEIDs:
+        default:
+          spiffeIDTemplate: spiffe://ml-platform.local/ns/{{ .PodMeta.Namespace }}/sa/{{ .PodSpec.ServiceAccountName }}
+          podSelector:
+            matchExpressions:
+              - { key: tier, operator: Exists }
+
+spire-agent:
+  workloadAttestors:
+    k8s:
+      enabled: true
+      skipKubeletVerification: false

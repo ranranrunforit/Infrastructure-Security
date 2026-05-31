@@ -1,0 +1,30 @@
+# Cilium: kube-proxy replacement + L7 policy + hubble visibility.
+kubeProxyReplacement: "true"
+k8sServiceHost: ""    # install.sh fills this from the current kubeconfig
+k8sServicePort: "443"
+
+ipam:
+  mode: "eni"
+eni:
+  enabled: true
+routingMode: "native"
+
+# Required for default-deny CiliumNetworkPolicy enforcement at L7.
+policyEnforcementMode: "default"
+
+encryption:
+  enabled: true
+  type: wireguard
+  nodeEncryption: true
+
+hubble:
+  enabled: true
+  relay:    { enabled: true }
+  ui:       { enabled: false }
+  metrics:
+    enabled:
+      - dns
+      - drop
+      - tcp
+      - flow
+      - policy

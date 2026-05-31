@@ -11,6 +11,6 @@ spec:
   selector: { matchLabels: { app: iris-api } }
   rules:
     - from:
-        - source: { principals: ["cluster.local/ns/ingress-nginx/sa/ingress-nginx"] }
+        - source: { principals: ["ml-platform.local/ns/istio-system/sa/istio-ingressgateway-service-account"] }
       to:
         - operation: { methods: [GET, POST], paths: ["/predict", "/health"] }

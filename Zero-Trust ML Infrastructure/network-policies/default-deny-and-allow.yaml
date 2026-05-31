@@ -41,7 +41,8 @@ spec:
   ingress:
     - fromEndpoints:
         - matchLabels:
-            k8s:io.kubernetes.pod.namespace: ingress-nginx
+            k8s:io.kubernetes.pod.namespace: istio-system
+            istio: ingressgateway
       toPorts:
         - ports:
             - port: "8080"

@@ -1,0 +1,23 @@
+# Falco with modern eBPF driver. Custom rules in falco-rules/ml-platform.yaml
+# are mounted via --set-file in install.sh.
+driver:
+  kind: modern-ebpf
+
+collectors:
+  kubernetes:
+    enabled: true
+
+falco:
+  json_output: true
+  json_include_output_property: true
+  log_stderr: true
+  log_syslog: false
+  priority: notice
+
+falcosidekick:
+  enabled: true
+  config:
+    # Wire alert sinks (Slack, webhook, etc.) here in production. Left empty
+    # so the chart installs without external credentials.
+    webhook:
+      address: ""

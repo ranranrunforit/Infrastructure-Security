@@ -37,6 +37,33 @@ Zero-Trust ML Infrastructure/
 |-- README.md                       # Project overview and usage guide
 |-- REQUIREMENTS.md                 # Project requirements
 |-- ARCHITECTURE.md                 # Zero-trust architecture notes
+|-- SOLUTION.md                     # Implementation summary
+|-- terraform/                      # VPC + EKS + audit S3 + IAM (IRSA)
+|   |-- versions.tf
+|   |-- variables.tf
+|   |-- main.tf
+|   |-- vpc.tf
+|   |-- eks.tf
+|   |-- audit-storage.tf            # S3 + Object Lock (COMPLIANCE) + IAM
+|   `-- outputs.tf
+|-- helm/                           # Install Cilium, Istio, SPIRE, Vault,
+|   |-- install.sh                  #   ESO, Kyverno, and Falco via Helm.
+|   |-- cilium-values.yaml
+|   |-- istio-base-values.yaml
+|   |-- istiod-values.yaml
+|   |-- spire-values.yaml
+|   |-- vault-values.yaml
+|   |-- external-secrets-values.yaml
+|   |-- kyverno-values.yaml
+|   `-- falco-values.yaml
+|-- app/
+|   |-- iris-api/
+|   |   |-- app.py                  # Minimal ML inference API
+|   |   `-- Dockerfile
+|   |-- kubernetes/
+|   |   |-- iris-api.yaml           # Namespace, ServiceAccount, Deployment, Service
+|   |   `-- ingress-gateway.yaml    # Istio Gateway + VirtualService
+|   `-- deploy.sh                   # render signed image digest and deploy app
 |-- network-policies/
 |   `-- default-deny-and-allow.yaml # Cilium default-deny and allow policies
 |-- istio/
@@ -54,7 +81,19 @@ Zero-Trust ML Infrastructure/
 |   `-- ml-platform.yaml            # Runtime detection rules for ML pods
 |-- audit/
 |   |-- audit-policy.yaml           # Kubernetes audit policy
-|   `-- hash-chain.py               # Tamper-evident audit verifier
+|   |-- hash-chain.py               # Tamper-evident audit verifier
+|   `-- long-term-storage/
+|       |-- audit-forwarder.yaml    # fluent-bit audit/falco -> S3 Object Lock
+|       |-- deploy.sh               # render Terraform outputs into forwarder manifest
+|       |-- commit-chain.sh         # commit a chain for a closed audit window
+|       `-- verify.sh               # pull objects + verify existing hash chain
+|-- benchmarks/
+|   |-- README.md
+|   |-- performance/
+|   |   |-- measure-p95.py
+|   |   `-- compare.sh
+|   `-- cost/
+|       `-- compare.sh
 `-- tests/
     `-- penetration.sh              # Penetration validation script
 ```
@@ -66,12 +105,17 @@ Zero-Trust ML Infrastructure/
 | Network microsegmentation | `network-policies/default-deny-and-allow.yaml` |
 | Service mesh mTLS | `istio/peer-authentication.yaml`, `istio/destination-rule.yaml` |
 | Service authorization | `istio/authz-policy.yaml` |
-| Workload identity | `spire/server.yaml`, `spire/workload-attestor.yaml` |
+| Workload identity | `helm/spire-values.yaml`; standalone manifests in `spire/` |
 | Vault-backed secrets | `secrets/vault-eso.yaml` |
 | Admission controls | `policies/kyverno-zero-trust.yaml` |
 | Runtime detection | `falco-rules/ml-platform.yaml` |
 | Audit integrity | `audit/audit-policy.yaml`, `audit/hash-chain.py` |
 | Penetration checks | `tests/penetration.sh` |
+| Infrastructure provisioning | `terraform/` |
+| Platform installation | `helm/install.sh` + per-component values |
+| Long-term audit storage | `terraform/audit-storage.tf` + `audit/long-term-storage/` |
+| ML application deployment | `app/` |
+| Performance and cost benchmarks | `benchmarks/` |
 
 ## Components
 
@@ -82,7 +126,7 @@ ingress and egress policies for `team-a`, `team-b`, and `iris`.
 
 The `iris-api-allow` policy only permits:
 
-- ingress from the `ingress-nginx` namespace to `iris-api` on TCP `8080`
+- ingress from Istio ingressgateway to `iris-api` on TCP `8080`
 - egress to kube-dns on UDP `53`
 - egress to Vault on TCP `8200`
 
@@ -97,12 +141,15 @@ adds connection-pool and outlier-detection settings for `iris-api`.
 
 `istio/authz-policy.yaml` creates a deny-by-default mesh authorization policy
 for the `iris` namespace, then explicitly allows ingress traffic from the
-`ingress-nginx` service account to `/predict` and `/health`.
+Istio ingressgateway service account to `/predict` and `/health`.
 
 ### SPIFFE/SPIRE Identity
 
-`spire/server.yaml` configures the SPIRE server with trust domain
-`ml-platform.local` and a 24-hour default X.509 SVID TTL.
+`helm/spire-values.yaml` installs SPIRE with trust domain
+`ml-platform.local`.
+
+`spire/server.yaml` also shows a standalone SPIRE server configuration with a
+24-hour default X.509 SVID TTL.
 
 `spire/workload-attestor.yaml` runs the SPIRE agent as a DaemonSet and uses the
 Kubernetes workload attestor to bind identities to namespace, service account,
@@ -154,29 +201,81 @@ including workload writes, policy changes, and secret reads.
 `audit/hash-chain.py` builds or verifies a tamper-evident SHA-256 hash chain
 over exported audit log files.
 
-## Expected Cluster Prerequisites
+`audit/long-term-storage/audit-forwarder.yaml` sends EKS control-plane audit
+logs from CloudWatch and Falco JSON logs from nodes to the S3 Object Lock
+bucket. `commit-chain.sh` writes the chain for a closed audit window, and
+`verify.sh` verifies downloaded objects against that existing chain.
 
-Before applying these manifests, the cluster should already have:
+### ML Application
 
-- Kubernetes with namespaces such as `iris`, `team-a`, and `team-b`
-- Cilium with `CiliumNetworkPolicy` CRDs installed
-- Istio installed with sidecar injection enabled for protected namespaces
-- Kyverno installed
-- Vault reachable at `https://vault.vault.svc:8200`
-- External Secrets Operator installed
-- Falco installed and configured to load `falco-rules/ml-platform.yaml`
-- `kubectl`, `rg`, and `python3` available where validation scripts run
+`app/iris-api/app.py` is a minimal inference service with:
 
-This folder does not include full cluster provisioning, Helm installation, or
-Terraform infrastructure.
+- `GET /health`
+- `POST /predict`
+
+`app/kubernetes/iris-api.yaml` deploys it as a non-root, read-only filesystem
+workload using the `iris-api` ServiceAccount and the Vault-backed
+`iris-api-secrets` reference. Replace the sample image digest with the signed
+image produced by your release pipeline before applying it:
+
+```text
+ghcr.io/example/ml-platform/iris-api@sha256:<signed-image-digest>
+```
+
+`app/kubernetes/ingress-gateway.yaml` exposes `/health` and `/predict` through
+Istio ingressgateway.
+
+## Provisioning the Cluster
+
+`terraform/` provisions a VPC, an EKS cluster with control-plane audit logs
+enabled, and the tamper-evident S3 audit bucket. The bucket uses Object Lock
+in COMPLIANCE mode and an IRSA role for the in-cluster log forwarder.
+
+```bash
+cd terraform
+terraform init
+terraform apply -var "audit_bucket_name=<globally-unique-name>"
+```
+
+Outputs include `cluster_name`, `audit_bucket`, and `audit_writer_role_arn`.
+
+## Installing the Platform Components
+
+`helm/install.sh` installs all seven dependencies (Cilium, Istio, SPIRE,
+Vault, External Secrets Operator, Kyverno, Falco) using the values files in
+`helm/`. Run after `aws eks update-kubeconfig` points kubectl at the cluster:
+
+```bash
+bash helm/install.sh
+```
+
+The Falco install side-loads `falco-rules/ml-platform.yaml` via `--set-file`,
+so no separate rules step is required.
 
 ## Apply Order
 
-Apply the controls after the platform dependencies are installed:
+Apply the in-repo manifests after the platform components are healthy.
+First create the tenant namespaces that the policies, secrets, and mesh
+manifests reference (without this step `kubectl apply` rejects the
+namespaced resources):
 
 ```bash
-kubectl apply -f spire/server.yaml
-kubectl apply -f spire/workload-attestor.yaml
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: iris
+  labels: { istio-injection: enabled, owner: ml-platform, tier: ml }
+---
+apiVersion: v1
+kind: Namespace
+metadata: { name: team-a, labels: { owner: team-a } }
+---
+apiVersion: v1
+kind: Namespace
+metadata: { name: team-b, labels: { owner: team-b } }
+EOF
+
 kubectl apply -f istio/peer-authentication.yaml
 kubectl apply -f istio/destination-rule.yaml
 kubectl apply -f istio/authz-policy.yaml
@@ -185,9 +284,27 @@ kubectl apply -f secrets/vault-eso.yaml
 kubectl apply -f policies/kyverno-zero-trust.yaml
 ```
 
-Load `falco-rules/ml-platform.yaml` through the Falco deployment method used by
-the cluster. Configure the Kubernetes API server with `audit/audit-policy.yaml`
-as its audit policy.
+Render Terraform outputs into the audit forwarder before applying it:
+
+```bash
+export AUDIT_BUCKET=$(terraform -chdir=terraform output -raw audit_bucket)
+export AUDIT_WRITER_ROLE_ARN=$(terraform -chdir=terraform output -raw audit_writer_role_arn)
+export CLUSTER_NAME=$(terraform -chdir=terraform output -raw cluster_name)
+export AWS_REGION=us-west-2
+bash audit/long-term-storage/deploy.sh
+```
+
+Deploy the ML application with a signed image digest that matches the Kyverno
+`verifyImages` policy:
+
+```bash
+export SIGNED_IMAGE_DIGEST=ghcr.io/example/ml-platform/iris-api@sha256:<signed-image-digest>
+bash app/deploy.sh
+```
+
+On EKS, control-plane audit logging is enabled by `cluster_enabled_log_types`
+in `terraform/eks.tf`. On self-managed clusters, wire `audit/audit-policy.yaml`
+into the kube-apiserver audit-policy flags directly.
 
 ## Validation
 
@@ -219,6 +336,15 @@ Then verify it:
 python3 audit/hash-chain.py verify --chain audit-chain.json /path/to/audit-logs/*
 ```
 
+To verify logs already shipped to the long-term S3 bucket:
+
+```bash
+export AUDIT_BUCKET=$(terraform -chdir=terraform output -raw audit_bucket)
+export CHAIN_KEY=k8s-audit/chain.json
+bash audit/long-term-storage/commit-chain.sh k8s-audit/
+bash audit/long-term-storage/verify.sh k8s-audit/
+```
+
 `tests/penetration.sh` can also verify the audit chain when these variables are
 set:
 
@@ -226,6 +352,24 @@ set:
 export AUDIT_LOG_DIR=/path/to/audit-logs
 export AUDIT_CHAIN_FILE=audit-chain.json
 bash tests/penetration.sh
+```
+
+## Benchmarks
+
+Measure NFR-001 p95 latency overhead:
+
+```bash
+export BASELINE_URL=http://baseline.example.com/predict
+export MESH_URL=http://iris-api.example.com/predict
+bash benchmarks/performance/compare.sh
+```
+
+Measure NFR-002 monthly cost overhead:
+
+```bash
+export BASELINE_MONTHLY_USD=1000
+export ZERO_TRUST_MONTHLY_USD=1125
+bash benchmarks/cost/compare.sh
 ```
 
 ## Requirement Coverage
@@ -238,18 +382,15 @@ bash tests/penetration.sh
 | FR-004 | Implemented | Kyverno signed image, label, non-root, and host namespace gates |
 | FR-005 | Implemented | Falco rules for shell, file modification, egress, and privilege events |
 | FR-006 | Implemented | Kubernetes audit policy plus local hash-chain verifier |
-| NFR-001 | Not measured here | Requires deployed-cluster latency testing |
-| NFR-002 | Not measured here | Requires deployed-cluster cost comparison |
+| NFR-001 | Benchmark implemented | Run `benchmarks/performance/compare.sh` against deployed baseline and mesh endpoints |
+| NFR-002 | Benchmark implemented | Run `benchmarks/cost/compare.sh` with baseline and zero-trust monthly costs |
 | NFR-003 | Partially covered | Reusable namespace policy templates are present; no onboarding automation |
 
 ## Current Scope
 
-This repository is a security-control implementation, not a full production
-platform installer. It does not include:
+This repository covers infrastructure provisioning, platform install,
+application deployment, long-term audit storage, penetration tests, and
+benchmark harnesses. It still does not include:
 
-- `terraform/` infrastructure provisioning
-- `helm/` charts for installing Cilium, Istio, SPIRE, Vault, ESO, Kyverno, or Falco
-- a complete ML application deployment
-- performance and cost benchmark results
-- long-term audit log storage configuration
-
+- real signed production image digests
+- collected benchmark result files from a live cluster

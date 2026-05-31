@@ -1,0 +1,23 @@
+# Vault in HA mode with Raft storage. After install, initialize and
+# unseal manually, then enable the kv-v2 engine at path `kv/`.
+server:
+  ha:
+    enabled: true
+    replicas: 3
+    raft:
+      enabled: true
+      setNodeId: true
+  dataStorage:
+    enabled: true
+    size: 10Gi
+  auditStorage:
+    enabled: true
+    size: 10Gi
+  standalone: { enabled: false }
+
+  # Used by ESO ClusterSecretStore (secrets/vault-eso.yaml).
+  service:
+    enabled: true
+
+injector:
+  enabled: false  # ESO is the secret path; injector duplicates that role.

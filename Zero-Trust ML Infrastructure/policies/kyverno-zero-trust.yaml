@@ -13,6 +13,7 @@ spec:
         any:
           - resources:
               kinds: ["Pod"]
+              namespaces: ["iris", "team-a", "team-b"]
       verifyImages:
         - imageReferences: ["*"]
           required: true
@@ -30,6 +31,7 @@ spec:
         any:
           - resources:
               kinds: ["Pod"]
+              namespaces: ["iris", "team-a", "team-b"]
       validate:
         message: "Pods must declare owner and tier labels."
         pattern:
@@ -42,6 +44,7 @@ spec:
         any:
           - resources:
               kinds: ["Pod"]
+              namespaces: ["iris", "team-a", "team-b"]
       validate:
         message: "Images must be pinned by digest."
         pattern:
@@ -53,6 +56,7 @@ spec:
         any:
           - resources:
               kinds: ["Pod"]
+              namespaces: ["iris", "team-a", "team-b"]
       validate:
         message: "Containers must run as non-root and disallow privilege escalation."
         pattern:
@@ -68,6 +72,7 @@ spec:
         any:
           - resources:
               kinds: ["Pod"]
+              namespaces: ["iris", "team-a", "team-b"]
       validate:
         message: "Pods may not use host namespaces."
         deny:

@@ -1,0 +1,14 @@
+admissionController:
+  replicas: 3
+backgroundController:
+  replicas: 2
+cleanupController:
+  replicas: 2
+reportsController:
+  replicas: 2
+
+# Enforce Kyverno's own policies (policies/kyverno-zero-trust.yaml) in
+# blocking mode rather than audit-only.
+config:
+  webhooks:
+    - failurePolicy: Fail

@@ -1,0 +1,37 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: iris-api
+  namespace: iris
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - iris-api.example.com
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: iris-api
+  namespace: iris
+spec:
+  hosts:
+    - iris-api.example.com
+  gateways:
+    - iris-api
+  http:
+    - match:
+        - uri:
+            exact: /health
+        - uri:
+            exact: /predict
+      route:
+        - destination:
+            host: iris-api.iris.svc.cluster.local
+            port:
+              number: 8080

@@ -1,0 +1,154 @@
+# Ships EKS control-plane audit logs and Falco JSON output to the immutable
+# S3 bucket provisioned by terraform/audit-storage.tf.
+apiVersion: v1
+kind: Namespace
+metadata: { name: audit }
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: audit-forwarder
+  namespace: audit
+  annotations:
+    # Replace with terraform output audit_writer_role_arn.
+    eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT_ID:role/zero-trust-ml-audit-writer
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: audit-forwarder-config, namespace: audit }
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush         5
+        Daemon        Off
+        Log_Level     info
+        Parsers_File  parsers.conf
+
+    [INPUT]
+        Name               cloudwatch_logs
+        Tag                k8s.audit
+        region             ${AWS_REGION}
+        log_group_name     /aws/eks/${CLUSTER_NAME}/cluster
+        log_stream_prefix  kube-apiserver-audit
+        interval_sec       30
+
+    [FILTER]
+        Name   record_modifier
+        Match  *
+        Record cluster ${CLUSTER_NAME}
+
+    [OUTPUT]
+        Name                          s3
+        Match                         k8s.audit
+        bucket                        ${AUDIT_BUCKET}
+        region                        ${AWS_REGION}
+        total_file_size               50M
+        upload_timeout                10m
+        s3_key_format                 /k8s-audit/%Y/%m/%d/%H/$UUID.gz
+        compression                   gzip
+        store_dir                     /buffers/s3-audit
+        use_put_object                On
+        send_content_md5              On
+
+  parsers.conf: |
+    [PARSER]
+        Name        json
+        Format      json
+        Time_Key    time
+        Time_Format %Y-%m-%dT%H:%M:%S.%LZ
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: audit-forwarder, namespace: audit }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: audit-forwarder } }
+  template:
+    metadata: { labels: { app: audit-forwarder, tier: platform } }
+    spec:
+      serviceAccountName: audit-forwarder
+      containers:
+        - name: fluent-bit
+          image: cr.fluentbit.io/fluent/fluent-bit:3.0
+          env:
+            - { name: AUDIT_BUCKET, value: REPLACE_WITH_TF_OUTPUT_audit_bucket }
+            - { name: AWS_REGION,   value: us-west-2 }
+            - { name: CLUSTER_NAME,  value: zero-trust-ml }
+          volumeMounts:
+            - { name: config,  mountPath: /fluent-bit/etc }
+            - { name: buffers, mountPath: /buffers }
+      volumes:
+        - { name: config,  configMap: { name: audit-forwarder-config } }
+        - { name: buffers, emptyDir: {} }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: falco-forwarder-config, namespace: audit }
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush         5
+        Daemon        Off
+        Log_Level     info
+        Parsers_File  parsers.conf
+
+    [INPUT]
+        Name              tail
+        Tag               falco
+        Path              /var/log/containers/*falco*.log
+        Parser            cri
+        DB                /buffers/flb-falco.db
+        Refresh_Interval  10
+
+    [FILTER]
+        Name   record_modifier
+        Match  *
+        Record cluster ${CLUSTER_NAME}
+
+    [OUTPUT]
+        Name                          s3
+        Match                         falco
+        bucket                        ${AUDIT_BUCKET}
+        region                        ${AWS_REGION}
+        total_file_size               20M
+        upload_timeout                10m
+        s3_key_format                 /falco/%Y/%m/%d/%H/$UUID.gz
+        compression                   gzip
+        store_dir                     /buffers/s3-falco
+        use_put_object                On
+        send_content_md5              On
+
+  parsers.conf: |
+    [PARSER]
+        Name        cri
+        Format      regex
+        Regex       ^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<logtag>[^ ]*) (?<log>.*)$
+        Time_Key    time
+        Time_Format %Y-%m-%dT%H:%M:%S.%L%z
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata: { name: falco-forwarder, namespace: audit }
+spec:
+  selector: { matchLabels: { app: falco-forwarder } }
+  template:
+    metadata: { labels: { app: falco-forwarder, tier: platform } }
+    spec:
+      serviceAccountName: audit-forwarder
+      containers:
+        - name: fluent-bit
+          image: cr.fluentbit.io/fluent/fluent-bit:3.0
+          env:
+            - { name: AUDIT_BUCKET, value: REPLACE_WITH_TF_OUTPUT_audit_bucket }
+            - { name: AWS_REGION,   value: us-west-2 }
+            - { name: CLUSTER_NAME,  value: zero-trust-ml }
+          volumeMounts:
+            - { name: config,    mountPath: /fluent-bit/etc }
+            - { name: containers-log, mountPath: /var/log/containers, readOnly: true }
+            - { name: pods-log,       mountPath: /var/log/pods,       readOnly: true }
+            - { name: buffers,   mountPath: /buffers }
+      volumes:
+        - { name: config,         configMap: { name: falco-forwarder-config } }
+        - { name: containers-log, hostPath:  { path: /var/log/containers, type: Directory } }
+        - { name: pods-log,       hostPath:  { path: /var/log/pods,       type: Directory } }
+        - { name: buffers,        emptyDir: {} }
