@@ -1,6 +1,6 @@
 ## Projects
 
-### Project 1: [Zero-Trust ML Infrastructure](/Adversarial%20ML%20Defense%20System/)
+### Project 1: [Zero-Trust ML Infrastructure](/Zero-Trust%20ML%20Infrastructure/)
 
 Build a comprehensive zero-trust security architecture implementing "never trust, always verify" principles across all ML infrastructure layers.
 
@@ -26,7 +26,7 @@ Automate compliance verification for GDPR, HIPAA, and SOC 2 with immutable audit
 - Data classification and encryption automation
 - Real-time compliance dashboards
 
-### Project 3: [Adversarial ML Defense System](projects/project-3-adversarial-defense/)
+### Project 3: [Adversarial ML Defense System](/Adversarial%20ML%20Defense%20System/)
 
 Defend ML models from adversarial attacks including evasion, poisoning, extraction, backdoors, and privacy attacks.
 
