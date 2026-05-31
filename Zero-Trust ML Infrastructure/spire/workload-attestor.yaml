@@ -1,0 +1,70 @@
+# SPIRE agent + k8s workload attestor: binds SVIDs to ns/sa/pod selectors.
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: spire-agent, namespace: spire }
+data:
+  agent.conf: |
+    agent {
+      data_dir         = "/run/spire"
+      log_level        = "INFO"
+      server_address   = "spire-server.spire.svc.cluster.local"
+      server_port      = "8081"
+      trust_domain     = "ml-platform.local"
+      socket_path      = "/run/spire/sockets/agent.sock"
+    }
+    plugins {
+      NodeAttestor "k8s_psat" { plugin_data { cluster = "ml-platform" } }
+      KeyManager  "memory"   { plugin_data {} }
+      WorkloadAttestor "k8s" {
+        plugin_data {
+          skip_kubelet_verification = false
+          node_name_env             = "MY_NODE_NAME"
+        }
+      }
+      WorkloadAttestor "unix" { plugin_data {} }
+    }
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata: { name: spire-agent, namespace: spire }
+spec:
+  selector: { matchLabels: { app: spire-agent } }
+  template:
+    metadata: { labels: { app: spire-agent } }
+    spec:
+      serviceAccountName: spire-agent
+      hostPID: true
+      containers:
+        - name: spire-agent
+          image: ghcr.io/spiffe/spire-agent:1.9.0
+          args: ["-config", "/run/spire/config/agent.conf"]
+          env:
+            - name: MY_NODE_NAME
+              valueFrom: { fieldRef: { fieldPath: spec.nodeName } }
+          volumeMounts:
+            - { name: config,         mountPath: /run/spire/config,  readOnly: true }
+            - { name: agent-socket,   mountPath: /run/spire/sockets }
+            - { name: kubelet,        mountPath: /var/lib/kubelet,   readOnly: true }
+      volumes:
+        - { name: config,       configMap: { name: spire-agent } }
+        - { name: agent-socket, hostPath: { path: /run/spire/sockets, type: DirectoryOrCreate } }
+        - { name: kubelet,      hostPath: { path: /var/lib/kubelet,   type: Directory } }
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata: { name: spire-agent, namespace: spire }
+---
+# Example registration entry: iris-api workload identity.
+# Apply via: kubectl exec -n spire spire-server-0 -- /opt/spire/bin/spire-server entry create ...
+# Kept here as documentation of the selector contract.
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: spire-registration-iris, namespace: spire }
+data:
+  iris-api.entry: |
+    spiffeID:    spiffe://ml-platform.local/ns/iris/sa/iris-api
+    parentID:    spiffe://ml-platform.local/ns/spire/sa/spire-agent
+    selectors:
+      - k8s:ns:iris
+      - k8s:sa:iris-api
+      - k8s:pod-label:app:iris-api

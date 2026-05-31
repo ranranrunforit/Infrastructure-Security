@@ -1,0 +1,26 @@
+# Force ISTIO_MUTUAL on egress side so clients never downgrade to plaintext,
+# even if a PeerAuthentication override is mis-set on the server side.
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: default-mtls
+  namespace: istio-system
+spec:
+  host: "*.local"
+  trafficPolicy:
+    tls: { mode: ISTIO_MUTUAL }
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata: { name: iris-api, namespace: iris }
+spec:
+  host: iris-api.iris.svc.cluster.local
+  trafficPolicy:
+    tls: { mode: ISTIO_MUTUAL }
+    connectionPool:
+      tcp: { maxConnections: 100 }
+      http: { http2MaxRequests: 1000, maxRequestsPerConnection: 10 }
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s

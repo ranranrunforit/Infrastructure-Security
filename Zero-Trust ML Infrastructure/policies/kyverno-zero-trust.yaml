@@ -1,0 +1,84 @@
+# FR-004: pre-deploy gates for signed images, required labels, non-root pods,
+# and no host namespace sharing.
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: zero-trust-workload-baseline
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: verify-signed-images
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      verifyImages:
+        - imageReferences: ["*"]
+          required: true
+          mutateDigest: true
+          verifyDigest: true
+          attestors:
+            - entries:
+                - keyless:
+                    issuer: "https://token.actions.githubusercontent.com"
+                    subject: "https://github.com/example/ml-platform/.github/workflows/release.yaml@refs/heads/main"
+                    rekor:
+                      url: "https://rekor.sigstore.dev"
+    - name: require-owner-and-tier-labels
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      validate:
+        message: "Pods must declare owner and tier labels."
+        pattern:
+          metadata:
+            labels:
+              owner: "?*"
+              tier: "?*"
+    - name: require-signed-image-reference
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      validate:
+        message: "Images must be pinned by digest."
+        pattern:
+          spec:
+            containers:
+              - image: "*@sha256:*"
+    - name: disallow-root-containers
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      validate:
+        message: "Containers must run as non-root and disallow privilege escalation."
+        pattern:
+          spec:
+            =(securityContext):
+              =(runAsNonRoot): true
+            containers:
+              - securityContext:
+                  runAsNonRoot: true
+                  allowPrivilegeEscalation: false
+    - name: disallow-host-namespaces
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      validate:
+        message: "Pods may not use host namespaces."
+        deny:
+          conditions:
+            any:
+              - key: "{{ request.object.spec.hostNetwork || `false` }}"
+                operator: Equals
+                value: true
+              - key: "{{ request.object.spec.hostPID || `false` }}"
+                operator: Equals
+                value: true
+              - key: "{{ request.object.spec.hostIPC || `false` }}"
+                operator: Equals
+                value: true

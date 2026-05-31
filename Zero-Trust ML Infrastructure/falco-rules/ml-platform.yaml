@@ -1,0 +1,42 @@
+# Falco rules for ML platform anomaly detection.
+- rule: Shell spawned in ML pod
+  desc: A shell was spawned in a Pod labeled tier=ml
+  condition: >
+    spawned_process and container and proc.name in (sh, bash, zsh)
+    and k8s.pod.label.tier = "ml"
+  output: >
+    Shell in ML pod (user=%user.name proc=%proc.cmdline pod=%k8s.pod.name)
+  priority: WARNING
+  tags: [ml, suspicious]
+
+- rule: File modification outside allowed ML paths
+  desc: A file outside approved writable paths was modified by an ML pod
+  condition: >
+    open_write and container and k8s.pod.label.tier = "ml"
+    and not fd.directory startswith /tmp
+    and not fd.directory startswith /var/tmp
+    and not fd.directory startswith /var/log
+    and not fd.directory startswith /models
+    and not proc.name in (model-loader, init-container)
+  output: >
+    ML pod modified disallowed path (user=%user.name file=%fd.name pod=%k8s.pod.name)
+  priority: CRITICAL
+  tags: [ml, tamper]
+
+- rule: Suspicious egress from ML pod
+  desc: Outbound connection to non-allowlisted endpoint
+  condition: >
+    outbound and container and k8s.pod.label.tier = "ml"
+    and not fd.sip in (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
+    and not fd.sport = 443
+  output: >
+    ML pod outbound to %fd.sip:%fd.sport (pod=%k8s.pod.name)
+  priority: WARNING
+  tags: [ml, exfiltration]
+
+- rule: Privileged container started
+  desc: Container ran with privileged=true
+  condition: container_started and container.privileged = true
+  output: Privileged container started (image=%container.image.repository pod=%k8s.pod.name)
+  priority: CRITICAL
+  tags: [privesc]

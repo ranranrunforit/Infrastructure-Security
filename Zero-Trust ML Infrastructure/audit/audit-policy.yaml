@@ -1,0 +1,30 @@
+# FR-006: Kubernetes audit policy for security-relevant writes and secret reads.
+apiVersion: audit.k8s.io/v1
+kind: Policy
+rules:
+  - level: RequestResponse
+    verbs: ["create", "update", "patch", "delete"]
+    resources:
+      - group: ""
+        resources: ["pods", "secrets", "serviceaccounts"]
+      - group: "apps"
+        resources: ["deployments", "daemonsets", "statefulsets"]
+      - group: "networking.k8s.io"
+        resources: ["networkpolicies"]
+      - group: "cilium.io"
+        resources: ["ciliumnetworkpolicies"]
+      - group: "kyverno.io"
+        resources: ["clusterpolicies", "policies"]
+  - level: Metadata
+    verbs: ["get", "list", "watch"]
+    resources:
+      - group: ""
+        resources: ["secrets"]
+  - level: Metadata
+    resources:
+      - group: "security.istio.io"
+        resources: ["authorizationpolicies", "peerauthentications"]
+  - level: None
+    resources:
+      - group: ""
+        resources: ["events"]
