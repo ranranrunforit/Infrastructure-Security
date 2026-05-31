@@ -4,7 +4,7 @@
 
 Build a comprehensive zero-trust security architecture implementing "never trust, always verify" principles across all ML infrastructure layers.
 
-**Technologies**: Kubernetes, Istio, HashiCorp Vault, Falco, OPA/Gatekeeper
+**Technologies**: Kubernetes, Istio, HashiCorp Vault, Falco, OPA/Gatekeeper  
 **Deliverables**:
 - Zero-trust network with default-deny policies
 - Mutual TLS across all services
@@ -16,7 +16,7 @@ Build a comprehensive zero-trust security architecture implementing "never trust
 
 Automate compliance verification for GDPR, HIPAA, and SOC 2 with immutable audit logs and data subject rights workflows.
 
-**Technologies**: OPA, ELK Stack, WORM storage, DLP tools, AES-256 encryption
+**Technologies**: OPA, ELK Stack, WORM storage, DLP tools, AES-256 encryption  
 **Deliverables**:
 - Automated compliance verification
 - Immutable audit logging infrastructure
@@ -28,7 +28,7 @@ Automate compliance verification for GDPR, HIPAA, and SOC 2 with immutable audit
 
 Defend ML models from adversarial attacks including evasion, poisoning, extraction, backdoors, and privacy attacks.
 
-**Technologies**: Adversarial Robustness Toolbox, CleverHans, TRADES, Opacus
+**Technologies**: Adversarial Robustness Toolbox, CleverHans, TRADES, Opacus  
 **Deliverables**:
 - Adversarial training pipeline
 - Certified defenses (randomized smoothing)
@@ -41,7 +41,7 @@ Defend ML models from adversarial attacks including evasion, poisoning, extracti
 
 Implement secure software supply chain for ML with 15+ security gates and SLSA Level 3 compliance.
 
-**Technologies**: GitHub Actions, Trivy, Cosign/Sigstore, SLSA, Snyk, ModelScan
+**Technologies**: GitHub Actions, Trivy, Cosign/Sigstore, SLSA, Snyk, ModelScan  
 **Deliverables**:
 - 15 security gates (SAST, secrets scanning, dependency scanning, etc.)
 - Container image signing and verification
@@ -54,7 +54,7 @@ Implement secure software supply chain for ML with 15+ security gates and SLSA L
 
 Build ML-focused SOC with SIEM, threat detection, incident response, and security analytics.
 
-**Technologies**: ELK Stack, Elasticsearch ML, PagerDuty, MITRE ATT&CK
+**Technologies**: ELK Stack, Elasticsearch ML, PagerDuty, MITRE ATT&CK  
 **Deliverables**:
 - SIEM deployment with hot/warm/cold tiers
 - 20+ ML-specific detection rules
