@@ -14,21 +14,21 @@ The project is organized as small attack, defense, and benchmark utilities. It d
 
 ```text
 Adversarial ML Defense System/
-|-- README.md
+|-- README.md                 # Project overview and usage guide
 |-- REQUIREMENTS.md           # Project requirements
 |-- RUNBOOK.md                # When to apply each defense
 |-- attacks/
 |   |-- pgd.py                # Native PyTorch PGD plus ART and Foolbox PGD wrappers
 |   |-- poisoning.py          # Label-flip poisoning
 |   |-- extraction.py         # Query-based surrogate training and agreement scoring
-|   |-- membership_inference.py
+|   |-- membership_inference.py # Per-sample loss and threshold attack
 |   |-- backdoor.py           # BadNets-style trigger stamping and attack success rate
 |   `-- textattack_nlp.py     # TextAttack recipe runner for NLP models
 |-- defenses/
-|   |-- adversarial_training.py
+|   |-- adversarial_training.py # PGD adversarial training epoch
 |   |-- input_validation.py   # IsolationForest request validation and FastAPI dependency
 |   |-- rate_limit.py         # Redis-backed per-tenant query budget
-|   |-- differential_privacy.py
+|   |-- differential_privacy.py # Opacus DP-SGD wrapper and budget reporting
 |   |-- backdoor_detection.py # Neural Cleanse and activation clustering helpers
 |   `-- watermarking.py       # Trigger-set watermark embedding and verification
 `-- benchmark/
