@@ -1,4 +1,4 @@
-# Project 1 Solution - Zero-Trust ML Infrastructure
+# Project 1 Zero-Trust ML Infrastructure
 
 Implementation for the zero-trust ML infrastructure project.
 
