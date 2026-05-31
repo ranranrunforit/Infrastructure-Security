@@ -34,29 +34,29 @@ admission.
 
 ```text
 Zero-Trust ML Infrastructure/
-|-- README.md
-|-- REQUIREMENTS.md
-|-- ARCHITECTURE.md
+|-- README.md                       # Project overview and usage guide
+|-- REQUIREMENTS.md                 # Project requirements
+|-- ARCHITECTURE.md                 # Zero-trust architecture notes
 |-- network-policies/
-|   `-- default-deny-and-allow.yaml
+|   `-- default-deny-and-allow.yaml # Cilium default-deny and allow policies
 |-- istio/
-|   |-- peer-authentication.yaml
-|   |-- authz-policy.yaml
-|   `-- destination-rule.yaml
+|   |-- peer-authentication.yaml    # Mesh-wide STRICT mTLS
+|   |-- authz-policy.yaml           # Istio service authorization policy
+|   `-- destination-rule.yaml       # Mutual TLS destination rules
 |-- spire/
-|   |-- server.yaml
-|   `-- workload-attestor.yaml
+|   |-- server.yaml                 # SPIRE server configuration
+|   `-- workload-attestor.yaml      # Kubernetes workload attestation
 |-- secrets/
-|   `-- vault-eso.yaml
+|   `-- vault-eso.yaml              # Vault and External Secrets references
 |-- policies/
-|   `-- kyverno-zero-trust.yaml
+|   `-- kyverno-zero-trust.yaml     # Kyverno admission controls
 |-- falco-rules/
-|   `-- ml-platform.yaml
+|   `-- ml-platform.yaml            # Runtime detection rules for ML pods
 |-- audit/
-|   |-- audit-policy.yaml
-|   `-- hash-chain.py
+|   |-- audit-policy.yaml           # Kubernetes audit policy
+|   `-- hash-chain.py               # Tamper-evident audit verifier
 `-- tests/
-    `-- penetration.sh
+    `-- penetration.sh              # Penetration validation script
 ```
 
 ## Implemented Controls
