@@ -1,7 +1,5 @@
 # Project 5: Security Operations Center for ML
 
-**Duration**: 130 hours
-
 ## Goal
 
 Stand up a SOC capable of detecting + responding to security incidents on an ML platform:
