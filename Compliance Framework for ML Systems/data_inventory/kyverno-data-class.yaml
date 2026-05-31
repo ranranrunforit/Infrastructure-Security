@@ -1,0 +1,35 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-data-class-label
+  annotations:
+    policies.kyverno.io/title: Require data_class label on PV/PVC
+    policies.kyverno.io/category: Compliance
+    policies.kyverno.io/description: >-
+      Enforces FR-001: every PersistentVolume and PersistentVolumeClaim must
+      carry a data_class label set to one of pii | phi | confidential | public.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: validate-data-class-pvc
+      match:
+        any:
+          - resources:
+              kinds:
+                - PersistentVolumeClaim
+                - PersistentVolume
+      validate:
+        message: >-
+          PV/PVC must have label data_class set to one of:
+          pii, phi, confidential, public.
+        deny:
+          conditions:
+            any:
+              - key: "{{ request.object.metadata.labels.data_class || '' }}"
+                operator: AnyNotIn
+                value:
+                  - pii
+                  - phi
+                  - confidential
+                  - public
