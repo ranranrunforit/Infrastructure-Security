@@ -21,8 +21,3 @@
    Tamper-evident hash chain in S3 + object lock
 ```
 
-## Cross-references
-- engineer-solutions/mod-109 ex-07 (Vault secret management)
-- engineer-solutions/mod-109 ex-08 (policy as code)
-- engineer-solutions/mod-103 ex-10 (SLSA supply chain)
-- engineer-solutions/mod-104 ex-14 (multi-tenancy)
