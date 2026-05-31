@@ -1,6 +1,4 @@
-# Project 3 Solution — Adversarial Defense
-
-Reference for [learning project 3](https://github.com/ai-infra-curriculum/ai-infra-security-learning/tree/main/projects/project-3-adversarial-defense).
+# Project 3 Adversarial Defense
 
 ## Layout
 
