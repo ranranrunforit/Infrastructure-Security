@@ -20,6 +20,7 @@ COSIGN_EXPERIMENTAL=1 cosign sign-blob --yes \
   "$MODEL_PATH"
 
 AUDIT_FILE=$(mktemp)
+trap 'rm -f "$AUDIT_FILE"' EXIT
 cat > "$AUDIT_FILE" <<EOF
 {
   "model_ref": "$MODEL_SUBJECT",
@@ -32,6 +33,7 @@ COSIGN_EXPERIMENTAL=1 cosign attest --yes \
   --predicate "$AUDIT_FILE" \
   "$MODEL_SUBJECT"
 rm -f "$AUDIT_FILE"
+trap - EXIT
 
 echo "signed: $MODEL_PATH"
 echo "  registry: $MODEL_SUBJECT"

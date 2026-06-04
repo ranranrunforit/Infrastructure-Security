@@ -20,18 +20,69 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: verify signed commits
+      - name: verify GitHub-verified commits
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BEFORE_SHA: ${{ github.event.before }}
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            git fetch --no-tags --depth=100 origin "${{ github.base_ref }}"
-            git rev-list "origin/${{ github.base_ref }}..HEAD" | xargs -r -n1 git verify-commit
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            mapfile -t commits < <(
+              gh api --paginate \
+                "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/commits" \
+                --jq '.[].sha'
+            )
+          elif [ -n "${BEFORE_SHA:-}" ] && [[ ! "$BEFORE_SHA" =~ ^0+$ ]]; then
+            mapfile -t commits < <(
+              gh api \
+                "repos/${GITHUB_REPOSITORY}/compare/${BEFORE_SHA}...${GITHUB_SHA}" \
+                --jq '.commits[].sha'
+            )
           else
-            git verify-commit HEAD
+            commits=("$GITHUB_SHA")
           fi
 
+          if [ "${#commits[@]}" -eq 0 ]; then
+            echo "No commits found to verify."
+            exit 1
+          fi
+
+          for sha in "${commits[@]}"; do
+            verified="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}" --jq '.commit.verification.verified')"
+            reason="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}" --jq '.commit.verification.reason')"
+            if [ "$verified" != "true" ]; then
+              echo "Commit ${sha} is not GitHub-verified: ${reason}"
+              exit 1
+            fi
+            echo "Verified commit ${sha}"
+          done
+
       # SAST
+      - name: detect CodeQL-supported source
+        id: codeql-detect
+        shell: bash
+        run: |
+          set -euo pipefail
+          if find . -path ./.git -prune -o -type f \( \
+              -name '*.c' -o -name '*.cc' -o -name '*.cpp' -o -name '*.cxx' -o \
+              -name '*.h' -o -name '*.hpp' -o -name '*.cs' -o -name '*.go' -o \
+              -name '*.java' -o -name '*.kt' -o -name '*.kts' -o -name '*.js' -o \
+              -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' -o -name '*.py' -o \
+              -name '*.rb' -o -name '*.swift' \
+            \) -print -quit | grep -q .; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "No CodeQL-supported source files found; skipping CodeQL."
+          fi
+
       - uses: github/codeql-action/init@v3
+        if: steps.codeql-detect.outputs.enabled == 'true'
       - uses: github/codeql-action/analyze@v3
+        if: steps.codeql-detect.outputs.enabled == 'true'
 
       # Dependency / secret scan
       - uses: trufflesecurity/trufflehog@main
@@ -79,9 +130,14 @@ jobs:
           COSIGN_EXPERIMENTAL: "1"
           DIGEST: ${{ steps.build.outputs.digest }}
           IMG: ghcr.io/${{ github.repository }}/app
+          CODEQL_ENABLED: ${{ steps.codeql-detect.outputs.enabled }}
         run: |
           set -euo pipefail
           IMAGE="${IMG}@${DIGEST}"
+          CODEQL_ACTION="codeql"
+          if [ "$CODEQL_ENABLED" != "true" ]; then
+            CODEQL_ACTION="codeql-skipped-no-supported-source"
+          fi
           cosign sign --yes "$IMAGE"
           cosign attest --yes --type cyclonedx --predicate sbom.cdx.json "$IMAGE"
           cat > audit.cicd.json <<EOF
@@ -94,7 +150,7 @@ jobs:
             "image": "$IMAGE",
             "actions": [
               "signed-commit-verified",
-              "codeql",
+              "$CODEQL_ACTION",
               "secret-scan",
               "image-build",
               "trivy-high-critical-scan",
